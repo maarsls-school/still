@@ -1,3 +1,12 @@
+const https = require('https');
+const fs = require('fs');
+
+const options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem'),
+}
+
+
 const express = require("express");
 const app = express();
 const server = require("http").Server(app);
@@ -13,9 +22,13 @@ app.get("/", (req, res) => { res.redirect(`/${uuidv4()}`); });
 app.get("/:room", (req, res) => { res.render("room", { roomId: req.param.room }); });
 
 io.on("connection", (socket) => {
+    console.log("join");
     socket.on("join-room", (roomId, userId) => {
         socket.join(roomId);
         socket.to(roomId).broadcast.emit("user-connected", userId);
     });
 });
-server.listen(3030);
+
+
+//create https server
+https.createServer(options, app).listen(3030);
